@@ -1,88 +1,55 @@
 #include <iostream>
-#include <vector>
 #include <string>
+#include <cstring>
+#include <queue>
 using namespace std;
 
+const int MAXN = 12;
 const int dx[8] = {-2, -2, -1, 1, 2,  2,  1, -1};
 const int dy[8] = {-1,  1,  2, 2, 1, -1, -2, -2};
 
-class KnightMoves
-{
-private:
-	vector<string> chessboard;
-	int numberOfMoves, minNumberOfMoves;
-	void dfs(int x, int y);
-	string a, b;
-public:
-	void initial() {
-		chessboard.clear();
-		numberOfMoves = 0; 
-		minNumberOfMoves = 100;
-	}
-	void readCase(string a, string b);
-	void computing();
-	void outResult() {
-		cout << "To get from " << a << " to " << b << " takes " << minNumberOfMoves << " knight moves." << endl;
-	}
-};
-void KnightMoves::readCase(string a, string b)
-{
-	chessboard.resize(12);
-	for (int i = 0; i < 12; i++) {
-		chessboard[0].push_back('0');
-		chessboard[1].push_back('0');
-		chessboard[10].push_back('0');
-		chessboard[11].push_back('0');
-	}
-	for (int i = 2; i < 10; i++)
-		for (int j = 2; j < 10; j++)
-			chessboard[i][j] = '1';
-	cout << b[0]-'a'+2 << b[1]-'0'+2 << endl;
-	chessboard[b[0]-'a'+2][b[1]-'0'+2] = '2';
-}
-void KnightMoves::computing()
-{
-	int r = a[0]-'a'+2, c = a[1]-'0'+2;
-	cout << r << ' ' << c << endl; // debug
-	if (chessboard[r][c] == '2') {
-		minNumberOfMoves = 0;
-		return;
-	}
-	minNumberOfMoves = 100;
-	for (int i = 0; i < 8; i++) {
-		if (chessboard[r+dx[i]][c+dy[i]] == '1') {
-			numberOfMoves = 1;
-			dfs(r+dx[i], c+dy[i]);
-			chessboard[r+dx[i]][c+dy[i]] = '1';  // recovery
-		}
-	}
-}
-void KnightMoves::dfs(int x, int y)
-{
-	if (chessboard[x][y] == '1') {
-		chessboard[x][y] = '0';
-		for (int i = 0; i < 8; i++) {
-			numberOfMoves++;
-			dfs(x + dx[i], y + dy[i]);
-			numberOfMoves--;  // recovery
-			chessboard[x+dx[i]][y+dy[i]] = '1';  // recovery
-		}
-	}
-	if (chessboard[x][y] == '2') {
-		if (numberOfMoves < minNumberOfMoves)
-			minNumberOfMoves = numberOfMoves;
-	}
+int visited[MAXN][MAXN];
+
+int bfs(int a1,int a2, int b1, int b2) {
+    queue< pair<int, int> > s;
+    pair<int, int> start(a1, a2);
+    s.push(start);
+
+    visited[a1][a2] = 1;
+    while (!s.empty()) {
+        pair<int, int> top = s.front();
+        s.pop();
+
+        if (top.first == b1 && top.second == b2)
+            return visited[b1][b2];  // found
+
+        for (int i = 0; i < 8; i++) {
+            int newX = top.first + dx[i];
+			int newY = top.second + dy[i];
+            if (visited[newX][newY] == 0 && newX < 9 && newX > 0 && newY < 9 && newY > 0) {  // haven't visited and on the chessboard
+                visited[newX][newY] = visited[top.first][top.second] + 1;
+                pair<int, int> node(newX, newY);
+                s.push(node);
+            }
+        }
+     }
 }
 
 int main()
 {
-    KnightMoves km;
-    string a, b;
-    while (cin >> a >> b) {
-          km.initial();
-          km.readCase(a, b);
-          km.computing();
-          km.outResult();
+	string a, b;
+    int ax, ay, bx, by;
+	while (cin >> a >> b) {
+		ax = a[0] - 'a' + 1;
+		ay = a[1] - '0';
+		bx = b[0] - 'a' + 1;
+		by = b[1] - '0';
+
+    	memset(visited, 0, sizeof(visited));
+
+		int result = bfs(ax, ay, bx, by) - 1;
+        result = (result == -1) ? 0 : result;
+
+        cout << "To get from " << a << " to " << b << " takes " << result << " knight moves." << endl;
     }
-    return 0;
 }
