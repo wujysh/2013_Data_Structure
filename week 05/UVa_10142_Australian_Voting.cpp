@@ -1,5 +1,7 @@
 #include <iostream>
+#include <sstream>
 #include <queue>
+#include <vector>
 #include <string>
 using namespace std;
 
@@ -21,7 +23,7 @@ public:
 		return choices.front();
 	}
 	void popChoice() {
-		queue.pop();
+		choices.pop();
 	}
 };
 
@@ -37,37 +39,54 @@ class AustralianVoting
 private:
 	vector<Candidate> ranking;
 	Ballot ballot[1000];
-	int intCandidate, intBallot;
+	int intCandidate, intBallot, intWinnerCnt, intWinner, intValidCandidate;
 public:
 	void init()
 	{
 		ranking.clear();
-		ballot.init();
 		intCandidate = 0;
+		intValidCandidate = 0;
 		intBallot = 0;
-		eliminated = false;
+		intWinner = 0;
 	}
 	void read()
 	{
 		cin >> intCandidate;
+		//cout << intCandidate << endl;  //debug
+		getchar();
+		intValidCandidate = intCandidate;
 		ranking.resize(intCandidate+1);
 		for (int i = 1; i <= intCandidate; i++) {
-			string strName;
-			getline(strName);
-			ranking[i].name = strName;
+			getline(cin, ranking[i].name);
+			//cout << ranking[i].name << endl; // debug
 			ranking[i].recvBallot = 0;
+			ranking[i].eliminated = false;
 		}
-		int c1, c2, c3;
-		while (cin >> c1 >> c2 >> c3 && c1 && c2 && c3) {
+		
+		string str;
+		while (getline(cin, str) && str != "") {
+			int c1 = 0, c2 = 0, c3 = 0;
+			stringstream scin(str);
+			scin >> c1 >> c2 >> c3;
+			if (c1 == 0 || c2 == 0 || c3 == 0) break;
+			//cout << c1 << c2 << c3 << endl; // debug
+			ballot[intBallot].init();
 			ballot[intBallot].read(c1, c2, c3);
 			intBallot++;
 		}
-		getline();			
+		//getline(cin, temp);  // ignore the blank line
 	}
 	void work();
 	void print()
 	{
-		// TODO:
+		if (intWinnerCnt == 1) {
+			cout << ranking[intWinner].name << endl;
+		}
+		if (intWinnerCnt == intValidCandidate) {
+			for (int i = 1; i <= intCandidate; i++)
+				if (!ranking[i].eliminated)
+					cout << ranking[i].name << endl;
+		}
 		cout << endl;
 	}
 };
@@ -75,7 +94,12 @@ void AustralianVoting::work()
 {
 	bool DONE = false;
 	while (!DONE) {
-		int max = 0, maxc = 0, min = 1000, minc = 0;
+		int max = 0, maxc = 0, maxn = 0, min = 1000, minc = 0;
+		// reset the count
+		for (int i = 1; i <= intCandidate; i++) {
+			ranking[i].recvBallot = 0;
+		}
+
 		// count the ballots
 		for (int i = 0; i < intBallot; i++) {
 			int choice = ballot[i].getChoice();
@@ -83,28 +107,44 @@ void AustralianVoting::work()
 			if (ranking[choice].recvBallot > max) {
 				max = ranking[choice].recvBallot;
 				maxc = choice;
+				maxn = 0;
 			}
 			if (ranking[choice].recvBallot < min) {
 				min = ranking[choice].recvBallot;
 				minc = choice;
 			}
+			if (ranking[choice].recvBallot == max) {  // record the number of candidates received the highest ballot
+				maxn++;
+			}
+
 		}
+
+		// judge whether the ballot has ended
+		if (maxn == 1 && ranking[maxc].recvBallot * 2 >= intBallot) {
+			intWinnerCnt = 1;
+			intWinner = maxc;
+			DONE = true;
+			return;
+		}
+		if (maxn == intValidCandidate) {
+			intWinnerCnt = intValidCandidate;
+			DONE = true;
+			return;
+		}
+
 		// eliminate the tied lowest candidates
 		for (int i = 1; i <= intCandidate; i++) {
 			if (!ranking[i].eliminated && ranking[i].recvBallot == min) {
 				ranking[i].eliminated = true;
 				for (int j = 0; j < intBallot; j++) {
-					if (ballot[j].getchoice() == i) {
+					if (ballot[j].getChoice() == i) {
 						ballot[j].popChoice();
 					}
 				}
+				intValidCandidate--;
 			}
 		}
-		// detect whether someone has won the voting
-		// TODO:
-
 	}
-	
 
 }
 
@@ -112,8 +152,11 @@ int main()
 {
 	AustralianVoting av;
 	int intCase;
+	string temp;
 	cin >> intCase;
-	getline();
+	//cout << intCase; // debug
+	getchar();
+	getline(cin, temp);	  // ignore the blank line
 	while (intCase--) {
 		av.init();
 		av.read();
