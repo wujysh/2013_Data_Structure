@@ -11,7 +11,7 @@ public:
 	void setValue(int v) {value = v;}
 	void setSuit(int s) {suit = s;}
 	void setCmpValue(int c) {cmpValue = c;}
-	int getCmpValue () const {return cmpValue;}
+	int getCmpValue() const {return cmpValue;}
 	friend bool operator< (const Card a, const Card b) {
 		return (a.cmpValue < b.cmpValue);
 	}
