@@ -1,72 +1,67 @@
 #include <iostream>
-//#include <stack>
-#include <queue>
-#include <cstring>
 #include <string>
-#include <algorithm>
+#include <cstring>
 using namespace std;
-#define MAXN 30
+#define MAXN 26
 
-int InDegree[MAXN];
-bool Graph[MAXN][MAXN], Exist[MAXN];
+bool Graph[MAXN][MAXN], Exist[MAXN], Visited[MAXN];
+int InDegree[MAXN], N;
+char Result[MAXN];
 
-bool TopologicalSort() {
-	//stack <int> Zero;
-	queue <int> Zero;
-	while (!Zero.empty()) { Zero.pop(); }
-	for (int i = 1; i <= 26; i++) {
-		if (Exist[i] && !InDegree[i]) Zero.push(i);
-	}
-	//int cnt = 0;
-	while (!Zero.empty()) {
-		//int x = Zero.top();  // stack
-		int x = Zero.front();  // queue
-		Zero.pop();
-		//if (cnt) cout << " ";
-		cout << char(x + 'A' - 1);  // output
-		//cnt++;
-		for (int i = 1; i <= 26; i++) {
-			if (Exist[i] && Graph[x][i]) {
-				if (!(--InDegree[i])) Zero.push(i);
-			}
-		}
-	}
-	//if (cnt < n) return false;  // ERROR
-	//else return true;  // OK
-	return true;
+void TopologicalSortAll(int step) {
+    if (step == N) {
+        Result[step] = '\0';
+        cout << Result << endl;
+    } else {
+        for (int i = 0; i < MAXN; i++) {
+            if (Exist[i] && !Visited[i] && !InDegree[i]) {
+                for (int j = 0; j < MAXN; j++) {
+                    if (Exist[j] && Graph[i][j]) InDegree[j]--;
+                }
+                Visited[i] = true;
+                Result[step] = char('a' + i);
+
+                TopologicalSortAll(step + 1);
+
+                for (int j = 0; j < MAXN; j++) {
+                    if (Exist[j] && Graph[i][j]) InDegree[j]++;
+                }
+                Visited[i] = false;
+            }
+        }
+    }
 }
 
 int main() {
-	string st, pre_st;
-	memset(Graph, 0, sizeof(Graph));
-	memset(InDegree, 0, sizeof(InDegree));
-	memset(Exist, 0, sizeof(Exist));
+    string st;
+    int cnt = 0;
+    while (getline(cin, st) && st[0]) {
+        if (cnt) cout << endl;
+        else cnt++;
 
-	while (cin >> st && st != "#") {
-		if (!pre_st.length()) pre_st = st;
-		if (pre_st.length()) {
-			int len1 = pre_st.length();
-			int len2 = st.length();
-			int len = len1 < len2 ? len1 : len2;
-			for (int i = 0; i < len; i++) {
-				if (pre_st[i] != st[i]) {
-					if (!Graph[pre_st[i] - 'A' + 1][st[i] - 'A' + 1]) {  // avoid repeated update!!!
-						Graph[pre_st[i] - 'A' + 1][st[i] - 'A' + 1] = true;
-						InDegree[st[i] - 'A' + 1]++;
-						Exist[pre_st[i] - 'A' + 1] = Exist[st[i] - 'A' + 1] = true;
-					}
-					break;
-				} else {
-					Exist[st[i] - 'A' + 1] = true;
-				}
-			}
-		}
-		pre_st = st;
-	}
+        memset(Graph, 0, sizeof(Graph));
+        memset(Exist, 0, sizeof(Exist));
+        memset(InDegree, 0, sizeof(InDegree));
+        memset(Visited, 0, sizeof(Visited));
+        N = 0;
 
-	TopologicalSort();
+        for (int i = 0; i < st.length(); i++) {
+            if (st[i] != ' ') {
+                Exist[st[i]-'a'] = true;
+                N++;
+            }
+        }
 
-	cout << endl;
+        getline(cin, st);
+        for (int i = 0; i < st.length()-2; i+=4) {
+            int x = st[i] - 'a', y = st[i+2] - 'a';
+            if (!Graph[x][y]) {
+                Graph[x][y] = true;
+                InDegree[y]++;
+            }
+        }
 
-	return 0;
+        TopologicalSortAll(0);
+    }
+    return 0;
 }
