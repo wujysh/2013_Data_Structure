@@ -1,40 +1,26 @@
-#include <iostream>
-#include <limits>
+#define _CRT_SECURE_NO_WARNINGS
+#include <cstdio>
 #include <string>
-#include <map>
+#include <set>
 using namespace std;
 
-string str[120010];
-bool exist[0x7fffffff] = { false };
-
-unsigned int jenkins_one_at_a_time_hash(const string &input, int start, int n) {
-	unsigned int hash = 0;
-	for (int i = 0; i < n; i++) {
-		hash += input[start + i];
-		hash += (hash << 10);
-		hash ^= (hash >> 6);
-	}
-	hash += (hash << 3);
-	hash ^= (hash >> 11);
-	hash += (hash << 15);
-	return hash;
-}
+set <string> dict;
 
 int main() {
-	int cnt = 0;
-	
-	while (cin >> str[cnt] && str[cnt] != "") {
-		exist[jenkins_one_at_a_time_hash(str[cnt], 0, str[cnt].length())] = true;
-		cnt++;
-	}
-	for (int i = 0; i < cnt; i++) {
-		for (int j = 1; j < str[i].length() - 1; j++) {
-			string a = str[i].substr(0, j - i);
-			string b = str[i].substr(j, str[i].length() - j);
-			if (exist[jenkins_one_at_a_time_hash(a, 0, a.length())] && exist[jenkins_one_at_a_time_hash(b, 0, b.length())]) {
-				cout << str[i] << endl;
+	char buf[1000];
+
+	while (gets(buf)) dict.insert(buf);
+
+	set <string>::iterator it;
+	for (it = dict.begin(); it != dict.end(); it++) {
+		string str = *it;
+		for (int i = 1; i < str.size() - 1; i++) {
+			if (dict.find(str.substr(0, i)) != dict.end() && dict.find(str.substr(i)) != dict.end()) {
+				puts(str.c_str());
+				break;
 			}
 		}
 	}
+
 	return 0;
 }
