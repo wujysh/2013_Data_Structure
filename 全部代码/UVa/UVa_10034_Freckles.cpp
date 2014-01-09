@@ -1,10 +1,10 @@
-// Similar to UVa 10397 Connect the campus
 #include <iostream>
 #include <iomanip>
 #include <queue>
+#include <cstdio>
 #include <cmath>
 using namespace std;
-#define MAXN 760
+#define MAXN 110
 
 struct edge {
 	int a, b;
@@ -25,27 +25,18 @@ int findroot(int x) {
 int main() {
 	int nCase;
 	cin >> nCase;
+	getchar();
 	while (nCase--) {
-		int n, m;
-		int x[MAXN], y[MAXN];
 		sum = 0;
-
+		int n;
+		double x[MAXN], y[MAXN];
 		cin >> n;
-
-		for (int i = 1; i <= n; i++) {
+		for (int i = 0; i < n; i++) {
 			cin >> x[i] >> y[i];
 			root[i] = i;
 		}
-		cin >> m;
-		for (int i = 0; i < m; i++) {
-			int c1, c2;
-			cin >> c1 >> c2;
-			if (findroot(c1) != findroot(c2))
-				root[findroot(c1)] = findroot(c2);
-		}
-
-		for (int i = 1; i <= n; i++) {
-			for (int j = i + 1; j <= n; j++) {
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
 				edge e;
 				e.a = i;
 				e.b = j;
@@ -53,33 +44,15 @@ int main() {
 				q.push(e);
 			}
 		}
-		int cnt = 0;
 		while (!q.empty()) {
 			edge e = q.top();
 			q.pop();
 			if (findroot(e.a) != findroot(e.b)) {
 				root[findroot(e.a)] = findroot(e.b);
 				sum += e.len;
-				cout << e.a << " " << e.b << endl;
-				cnt++;
-
 			}
 		}
-
-			sort(edges.begin(), edges.end());
-			finder.clear();
-			for (int i = 0; i < nodes.size(); i++)
-				finder.push_back(i);
-			for (unsigned int i = 0; i<edges.size(); i++) {
-				int a = find(edges[i].fromIndex);
-				int b = find(edges[i].toIndex);
-				if (a != b) {
-					finder[a] = b;
-					mini_tree.push_back(edges[i]);
-				}
-			}
-
-		if (!cnt) cout << "No new highways need" << endl;
+		cout << fixed << setprecision(2) << sum << endl;
 		if (nCase) cout << endl;
 	}
 	return 0;

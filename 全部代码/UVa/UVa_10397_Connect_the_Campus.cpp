@@ -1,4 +1,3 @@
-// Similar to UVa 10397 Connect the campus
 #include <iostream>
 #include <iomanip>
 #include <queue>
@@ -23,14 +22,10 @@ int findroot(int x) {
 }
 
 int main() {
-	int nCase;
-	cin >> nCase;
-	while (nCase--) {
-		int n, m;
-		int x[MAXN], y[MAXN];
+	int n, m;
+	while (cin >> n && n) {
 		sum = 0;
-
-		cin >> n;
+		int x[MAXN], y[MAXN];
 
 		for (int i = 1; i <= n; i++) {
 			cin >> x[i] >> y[i];
@@ -53,34 +48,17 @@ int main() {
 				q.push(e);
 			}
 		}
-		int cnt = 0;
+
 		while (!q.empty()) {
 			edge e = q.top();
 			q.pop();
 			if (findroot(e.a) != findroot(e.b)) {
 				root[findroot(e.a)] = findroot(e.b);
 				sum += e.len;
-				cout << e.a << " " << e.b << endl;
-				cnt++;
-
 			}
 		}
 
-			sort(edges.begin(), edges.end());
-			finder.clear();
-			for (int i = 0; i < nodes.size(); i++)
-				finder.push_back(i);
-			for (unsigned int i = 0; i<edges.size(); i++) {
-				int a = find(edges[i].fromIndex);
-				int b = find(edges[i].toIndex);
-				if (a != b) {
-					finder[a] = b;
-					mini_tree.push_back(edges[i]);
-				}
-			}
-
-		if (!cnt) cout << "No new highways need" << endl;
-		if (nCase) cout << endl;
+		cout << fixed << setprecision(2) << sum << endl;
 	}
 	return 0;
 }

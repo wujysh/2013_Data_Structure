@@ -1,8 +1,9 @@
 // Similar to UVa 10397 Connect the campus
 #include <iostream>
+#include <algorithm>
 #include <iomanip>
-#include <queue>
 #include <cmath>
+#include <vector>
 using namespace std;
 #define MAXN 760
 
@@ -10,13 +11,13 @@ struct edge {
 	int a, b;
 	double len;
 	friend bool operator < (const edge a, const edge b) {
-		return a.len > b.len;
+		return a.len < b.len;
 	}
 };
-priority_queue <edge> q;
 
 int root[MAXN];
 double sum;
+vector <edge> edges;
 
 int findroot(int x) {
 	return root[x] == x ? x : root[x] = findroot(root[x]);
@@ -29,6 +30,7 @@ int main() {
 		int n, m;
 		int x[MAXN], y[MAXN];
 		sum = 0;
+		edges.clear();
 
 		cin >> n;
 
@@ -36,6 +38,7 @@ int main() {
 			cin >> x[i] >> y[i];
 			root[i] = i;
 		}
+
 		cin >> m;
 		for (int i = 0; i < m; i++) {
 			int c1, c2;
@@ -50,34 +53,22 @@ int main() {
 				e.a = i;
 				e.b = j;
 				e.len = sqrt((x[i] - x[j])*(x[i] - x[j]) + (y[i] - y[j])*(y[i] - y[j]));
-				q.push(e);
+				edges.push_back(e);
 			}
 		}
+
+		// kruskal
 		int cnt = 0;
-		while (!q.empty()) {
-			edge e = q.top();
-			q.pop();
-			if (findroot(e.a) != findroot(e.b)) {
-				root[findroot(e.a)] = findroot(e.b);
-				sum += e.len;
-				cout << e.a << " " << e.b << endl;
+		sort(edges.begin(), edges.end());
+		for (unsigned int i = 0; i<edges.size(); i++) {
+			int a = findroot(edges[i].a);
+			int b = findroot(edges[i].b);
+			if (a != b) {
+				root[a] = b;
+				cout << edges[i].a << " " << edges[i].b << endl;
 				cnt++;
-
 			}
 		}
-
-			sort(edges.begin(), edges.end());
-			finder.clear();
-			for (int i = 0; i < nodes.size(); i++)
-				finder.push_back(i);
-			for (unsigned int i = 0; i<edges.size(); i++) {
-				int a = find(edges[i].fromIndex);
-				int b = find(edges[i].toIndex);
-				if (a != b) {
-					finder[a] = b;
-					mini_tree.push_back(edges[i]);
-				}
-			}
 
 		if (!cnt) cout << "No new highways need" << endl;
 		if (nCase) cout << endl;
